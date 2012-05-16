@@ -1,0 +1,4 @@
+name = Hook Priority
+description = Change priority of the single hooks.
+package = Other
+core = 7.x

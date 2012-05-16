@@ -1,4 +1,1 @@
-hook_priority
-=============
-
-Drupal 7 module
+See master README

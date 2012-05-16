@@ -1,0 +1,169 @@
+<?php
+
+/**
+ * @file
+ *
+ * Attach to drupal's hooks.
+ */
+
+
+//hook_priority_set('context_block_view_alter', 100);
+//hook_priority_set('context_block_view_alter2', 100);
+//hook_priority_set('context_block_view_alter3', 100);
+//hook_priority_set('visitdk_blocks_block_view_alter', -1);
+//hook_priority_set('asp_language_panel_variants_form_alter', 100);
+//hook_priority_set('diff_form_alter', '-3');
+//hook_priority_set('popup_block_form_alter', 'last');
+//hook_priority_set('wysiwyg_form_alter', 'first');
+//hook_priority_set_after('menu_block_view_alter', 'context');
+//hook_priority_set_after('visitdk_blocks_block_view_alter', 'i18n_menu');
+
+
+/**
+ * Set priority of the hook.
+ *
+ * @param string $hook
+ *   Hook name.
+ *
+ * @param int $weight
+ *   Weight for the hook.
+ */
+function hook_priority_set($hook = '', $weight = 0) {
+  $hooks_priority_list = &drupal_static('hooks_priority_list', array());
+  if ($hook) {
+    $hooks_priority_list[$hook] = $weight;
+  }
+}
+
+/**
+ * Set priority of the hook to be performed at the end of list.
+ *
+ * @param string $hook
+ *   Hook name.
+ */
+function hook_priority_set_first($hook) {
+  hook_priority_set($hook, 'first');
+}
+
+/**
+ * Set priority of the hook to be performed at the beggining of list.
+ *
+ * @param string $hook
+ *   Hook name.
+ */
+function hook_priority_set_last($hook) {
+  hook_priority_set($hook, 'last');
+}
+
+/**
+ * Move hook to be performed after such hooks from other module.
+ *
+ * @param string $hook
+ *   Hook name.
+ *
+ * @param string $keyhook
+ *   Module name.
+ */
+function hook_priority_set_after($hook, $module) {
+  hook_priority_set($hook, '+' . $module);
+}
+
+/**
+ * Move hook to be performed after such hooks from other module.
+ *
+ * @param string $hook
+ *   Hook name.
+ *
+ * @param string $module
+ *   Module name.
+ */
+function hook_priority_set_before($hook, $module) {
+  hook_priority_set($hook, '-' . $module);
+}
+
+/**
+ * Insert element in a specify position
+ * after or before key.
+ *
+ * @param array $array
+ *   Input array.
+ * @param array $e
+ *   Element to be inserted.
+ * @param string $key
+ *   Key to match
+ * @param string $position
+ *   Pisition [after|before] defaults is after
+ *
+ * @return array
+ */
+function _hook_priority_array_insert($array, $element, $key, $position = 'after') {
+
+  $i = 0;
+  foreach ($array as $k => $v) {
+    $i++;
+    if ($k === $key) {
+      if ($position === 'before') {
+        $i--;
+      }
+      $array = array_slice($array, 0, $i, TRUE) + (array) $element + array_slice($array, $i, NULL, TRUE);
+      return $array;
+    }
+  }
+  return $array;
+
+}
+
+/**
+ * Implements hook_implements_alter().
+ *
+ * Altering the implementations, and prioritize them.
+ */
+function hook_priority_module_implements_alter(&$module_list, $hook) {
+
+  $hooks_priority_list = &drupal_static('hooks_priority_list', array());
+
+  $hooks_ordered = array();
+  foreach ($module_list as $module => $group) {
+    $weight = isset($hooks_priority_list[$module . '_' . $hook]) ? $hooks_priority_list[$module . '_' . $hook] : 0;
+    $hooks_ordered[$weight][$module] = $group;
+  }
+
+  if (!empty($hooks_ordered)) {
+
+    ksort($hooks_ordered);
+
+    if (isset($hooks_ordered['first'])) {
+      array_unshift($hooks_ordered, $hooks_ordered['first']);
+      unset($hooks_ordered['first']);
+    }
+    if (isset($hooks_ordered['last'])) {
+      array_push($hooks_ordered, $hooks_ordered['last']);
+      unset($hooks_ordered['last']);
+    }
+
+    $trigger_afterbefore = FALSE;
+    $module_list = array();
+    foreach ($hooks_ordered as $weight => $hooks) {
+      !$trigger_afterbefore && $trigger_afterbefore = !is_numeric($weight);
+      $module_list += $hooks;
+    }
+
+    if ($trigger_afterbefore) {
+      foreach ($hooks_ordered as $weight => $hooks) {
+        if ($weight{0} === '+') {
+          foreach ($hooks as $k => $v) {
+            unset($module_list[$k]);
+          }
+          $module_list = _hook_priority_array_insert($module_list, $hooks, substr($weight, 1), 'after');
+        }
+        elseif ($weight{0} === '-') {
+          foreach ($hooks as $k => $v) {
+            unset($module_list[$k]);
+          }
+          $module_list = _hook_priority_array_insert($module_list, $hooks, substr($weight, 1), 'before');
+        }
+      }
+    }
+  }
+
+}
