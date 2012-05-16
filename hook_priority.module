@@ -7,18 +7,6 @@
  */
 
 
-//hook_priority_set('context_block_view_alter', 100);
-//hook_priority_set('context_block_view_alter2', 100);
-//hook_priority_set('context_block_view_alter3', 100);
-//hook_priority_set('visitdk_blocks_block_view_alter', -1);
-//hook_priority_set('asp_language_panel_variants_form_alter', 100);
-//hook_priority_set('diff_form_alter', '-3');
-//hook_priority_set('popup_block_form_alter', 'last');
-//hook_priority_set('wysiwyg_form_alter', 'first');
-//hook_priority_set_after('menu_block_view_alter', 'context');
-//hook_priority_set_after('visitdk_blocks_block_view_alter', 'i18n_menu');
-
-
 /**
  * Set priority of the hook.
  *
