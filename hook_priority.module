@@ -2,7 +2,6 @@
 
 /**
  * @file
- *
  * Attach to drupal's hooks.
  */
 
@@ -49,7 +48,7 @@ function hook_priority_set_last($hook) {
  * @param string $hook
  *   Hook name.
  *
- * @param string $keyhook
+ * @param string $module
  *   Module name.
  */
 function hook_priority_set_after($hook, $module) {
@@ -75,17 +74,17 @@ function hook_priority_set_before($hook, $module) {
  *
  * @param array $array
  *   Input array.
- * @param array $e
+ * @param array $element
  *   Element to be inserted.
  * @param string $key
  *   Key to match
  * @param string $position
- *   Pisition [after|before] defaults is after
+ *   Pisition [after|before] defaults is after/
  *
  * @return array
+ *   Array with inserted element.
  */
 function _hook_priority_array_insert($array, $element, $key, $position = 'after') {
-
   $i = 0;
   foreach ($array as $k => $v) {
     $i++;
@@ -98,7 +97,6 @@ function _hook_priority_array_insert($array, $element, $key, $position = 'after'
     }
   }
   return $array;
-
 }
 
 /**
