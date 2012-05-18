@@ -5,6 +5,14 @@
  * Attach to drupal's hooks.
  */
 
+/*
+ * Set default hook priority weight to 0.
+ *
+ * Can be overriden by the settings.php.
+ */
+if (!defined('HOOK_PRIORITY_DEFAULT_WEIGHT')) {
+  define('HOOK_PRIORITY_DEFAULT_WEIGHT', 0);
+}
 
 /**
  * Set priority of the hook.
@@ -77,22 +85,24 @@ function hook_priority_set_before($hook, $module) {
  * @param array $element
  *   Element to be inserted.
  * @param string $key
- *   Key to match
+ *   Key to match.
  * @param string $position
- *   Pisition [after|before] defaults is after/
+ *   Pisition [after|before] defaults is after.
  *
  * @return array
  *   Array with inserted element.
  */
 function _hook_priority_array_insert($array, $element, $key, $position = 'after') {
-  $i = 0;
-  foreach ($array as $k => $v) {
-    $i++;
-    if ($k === $key) {
+  $pos = 0;
+  foreach ($array as $array_key => $array_val) {
+    $pos++;
+    if ($array_key === $key) {
       if ($position === 'before') {
-        $i--;
+        $pos--;
       }
-      $array = array_slice($array, 0, $i, TRUE) + (array) $element + array_slice($array, $i, NULL, TRUE);
+      $array = array_slice($array, 0, $pos, TRUE)
+        + (array) $element
+        + array_slice($array, $pos, NULL, TRUE);
       return $array;
     }
   }
@@ -106,48 +116,75 @@ function _hook_priority_array_insert($array, $element, $key, $position = 'after'
  */
 function hook_priority_module_implements_alter(&$module_list, $hook) {
 
+  // Get the stack where we are inserted custom rules.
   $hooks_priority_list = &drupal_static('hooks_priority_list', array());
 
+  // If we have no custom priorities for hooks, skip this alter.
+  if (empty($hooks_priority_list)) {
+    return;
+  }
+
+  // Populate weights for all hooks, set default to 0
   $hooks_ordered = array();
   foreach ($module_list as $module => $group) {
-    $weight = isset($hooks_priority_list[$module . '_' . $hook]) ? $hooks_priority_list[$module . '_' . $hook] : 0;
+    $weight = isset($hooks_priority_list[$module . '_' . $hook])
+      ? $hooks_priority_list[$module . '_' . $hook]
+      : HOOK_PRIORITY_DEFAULT_WEIGHT;
+
     $hooks_ordered[$weight][$module] = $group;
   }
 
   if (!empty($hooks_ordered)) {
 
+    // Sort hooks by weight.
     ksort($hooks_ordered);
 
+    // Move hooks marked as 'first' to beginning of the list.
     if (isset($hooks_ordered['first'])) {
       array_unshift($hooks_ordered, $hooks_ordered['first']);
       unset($hooks_ordered['first']);
     }
+
+    // Move hooks marked as 'last' to the end of list.
     if (isset($hooks_ordered['last'])) {
       array_push($hooks_ordered, $hooks_ordered['last']);
       unset($hooks_ordered['last']);
     }
 
+    // Flag for is there after or before rule for some hook,
+    // prevent from extra loops.
     $trigger_afterbefore = FALSE;
+
     $module_list = array();
     foreach ($hooks_ordered as $weight => $hooks) {
+      // If there is string in hook weight,
+      // then its before or after, so flag it.
       !$trigger_afterbefore && $trigger_afterbefore = !is_numeric($weight);
+
+      // Append hooks from this weight group to the newly builded hooks list.
       $module_list += $hooks;
     }
 
+    // If there is no after/before rule, then don't do extra loops.
     if ($trigger_afterbefore) {
       foreach ($hooks_ordered as $weight => $hooks) {
+
+        // The + (plus) means it is after.
         if ($weight{0} === '+') {
           foreach ($hooks as $k => $v) {
             unset($module_list[$k]);
           }
           $module_list = _hook_priority_array_insert($module_list, $hooks, substr($weight, 1), 'after');
         }
+
+        // The - (minus) means it is before.
         elseif ($weight{0} === '-') {
           foreach ($hooks as $k => $v) {
             unset($module_list[$k]);
           }
           $module_list = _hook_priority_array_insert($module_list, $hooks, substr($weight, 1), 'before');
         }
+
       }
     }
   }

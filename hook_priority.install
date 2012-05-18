@@ -9,6 +9,6 @@
  * Implements hook_install().
  */
 function hook_priority_install() {
-  // Set modules weight/
+  // Set modules weight.
   db_query('UPDATE {system} SET weight = -65535 WHERE name = \'hook_priority\' AND type = \'module\' LIMIT 1;');
 }
