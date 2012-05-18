@@ -77,7 +77,7 @@ function hook_priority_set_before($hook, $module) {
 }
 
 /**
- * Insert element in a specify position
+ * Insert element in a specify position of array
  * after or before key.
  *
  * @param array $array
