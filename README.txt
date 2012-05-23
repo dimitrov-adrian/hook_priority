@@ -80,7 +80,7 @@ DOWNLOAD
 -----------
 
 Project page: http://drupal.org/node/1586688
-Git (drupal.org): http://git.drupal.org/sandbox/dimitrov.adrian/1586688.git
+Git (drupal.org): http://drupalcode.org/sandbox/dimitrov.adrian/1586688.git
 Git (github): https://github.com/dimitrov-adrian/hook_priority
 
 
