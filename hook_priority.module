@@ -5,7 +5,7 @@
  * Attach to drupal's hooks.
  */
 
-/*
+/**
  * Set default hook priority weight to 0.
  *
  * Can be overriden by the settings.php.
