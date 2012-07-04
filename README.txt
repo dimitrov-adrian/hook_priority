@@ -77,7 +77,7 @@ REQUIREMENTS
 
 
 DOWNLOAD
------------
+--------
 
 Project page: http://drupal.org/node/1586688
 Git (drupal.org): http://drupalcode.org/sandbox/dimitrov.adrian/1586688.git
