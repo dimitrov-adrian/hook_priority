@@ -1,4 +1,4 @@
 name = Hook Priority
-description = Change priority of the single hooks.
+description = Allow prioritization of the Drupal's hooks.
 package = Other
 core = 7.x

@@ -109,7 +109,7 @@ function _hook_priority_array_insert($array, $element, $key, $position = 'after'
 }
 
 /**
- * Implements hook_implements_alter().
+ * Implements hook_module_implements_alter().
  *
  * Altering the implementations, and prioritize them.
  */
